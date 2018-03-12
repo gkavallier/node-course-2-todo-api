@@ -20,6 +20,15 @@ app.post('/todos', (req,res) => {
     });
 });
 
+app.get('/todos', (req, res) => {
+    Todo.find().then((todos) => {
+        res.send({todos} ); // we pass an object with array instead of array to be flex for future
+    }, (e) => {
+        res.statys(400).send(e);
+    });
+
+});
+
 
 app.listen(3000, () => {
     console.log('started server on port 3000...');
