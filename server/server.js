@@ -24,7 +24,7 @@ app.get('/todos', (req, res) => {
     Todo.find().then((todos) => {
         res.send({todos} ); // we pass an object with array instead of array to be flex for future
     }, (e) => {
-        res.statys(400).send(e);
+        res.status(400).send(e);
     });
 
 });
