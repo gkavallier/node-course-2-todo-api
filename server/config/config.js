@@ -1,4 +1,4 @@
-var env = process.env.NODE_ENV || 'development'; // if production, this will be set to 'production'
+var env = process.env.NODE_ENV || 'development'; // if production , this will be set to 'production'
 
 if (env === 'development') {
     process.env.PORT = 3000;
