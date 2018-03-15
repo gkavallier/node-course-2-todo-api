@@ -10,6 +10,7 @@ const bodyParser = require('body-parser');
 var {mongoose} = require('./db/mongoose');
 var {Todo} = require('./models/todo');
 var {User} = require('./models/user');
+var {authenticate} = require('./middleware/authenticate');
 
 var app = express();
 const port = process.env.PORT;
@@ -107,6 +108,45 @@ app.post('/users', (req,res) => {
     }).catch( (e) => {
         res.status(400).send(e);
     });
+});
+
+// commented out we are calling the authenticate from separate file
+//
+// var authenticate = (req, res, next) => {        // next will be used by the middleware else it will get stuck
+//     var token = req.header('x-auth');
+
+//     User.findByToken(token).then((user) => {
+//         if (!user) {
+//             // res.status(401).send();
+//             return Promise.reject(); // same as above but better coding. this takes us directly to the catch block, function  stops executing and goes to catch block
+//         }
+
+//         req.user = user;  // will modify the req properties  of calling entity when middleare is called
+//         req.token = token; // will modify the req properties  of calling entity when middleare is called
+//         next();  // so the code of the calling function executes 
+//     }).catch((e) => {
+//         res.status(401).send();  //return that authentication failed. this catch block catches the reject case of findByToken method
+//         // we dont call next, we dont go to the calling function since auth failed
+//     });
+
+// };
+
+app.get('/users/me', authenticate, (req, res) => {      //authenticate middleware will be used
+    // var token = req.header('x-auth');
+
+    // User.findByToken(token).then((user) => {
+    //     if (!user) {
+    //         // res.status(401).send();
+    //         return Promise.reject(); // same as above but better coding. this takes us directly to the catch block, function  stops executing and goes to catch block
+    //     }
+
+    //     res.send(user);
+    // }).catch((e) => {
+    //     res.status(401).send();  //return that authentication failed. this catch block catches the reject case of findByToken method
+    // });
+
+    // code above is replaced by the authenticate middleware defined above which authenticates and then sends the req.user if auth ok
+    res.send(req.user);
 });
 
 app.listen(port, () => {

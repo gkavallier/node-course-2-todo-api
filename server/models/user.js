@@ -49,7 +49,7 @@ UserSchema.methods.toJSON = function () {
 };
 
 UserSchema.methods.generateAuthToken = function () {
-    var user = this;
+    var user = this;     // instance methods (small letters) called with the individual document
     var access = 'auth';
     var token =  jwt.sign({_id: user._id.toHexString(), access},'abc123').toString();
     // user.tokens.push({access,token});
@@ -62,6 +62,28 @@ UserSchema.methods.generateAuthToken = function () {
         return token; // returning value not function in promise because this will be used by anoter then in server
     });
 };
+
+// statics instead of method returns a model method as opposed to instance method (must se what it means)
+
+UserSchema.statics.findByToken = function(token) {
+    var User = this; //  model methods get called with the model as the "this" binding
+    var decoded;  //decoded initially undefined because we need to use (below) the try block in case of error so to catch it
+
+    try {
+        decoded = jwt.verify(token, 'abc123');
+    } catch (e) {
+        // return new Promise ((resolve, reject) => {
+        //     reject();
+        // });
+        return Promise.reject(); // this simplifies the code above doing exactly the same thing. we need to return a reject promise to be taken by the then/catch block of the original caller in server.js
+    }
+    return User.findOne({
+        '_id': decoded._id,    // quotes here not necessary needed but do so for consistency with below
+        'tokens.token': token,
+        'tokens.access': 'auth'
+    });
+};
+
 
 var User = mongoose.model('User', UserSchema);
 
