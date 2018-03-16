@@ -6,6 +6,8 @@ const jwt = require('jsonwebtoken');
 
 const _ = require('lodash');
 
+const bcrypt = require('bcryptjs');
+
 
 //create mongoose model so mongoose knows how to store data
 
@@ -84,6 +86,24 @@ UserSchema.statics.findByToken = function(token) {
     });
 };
 
+// .pre is a mongoose middleware so this runs code before an event - this time the save event
+
+UserSchema.pre('save', function (next) {  // classic function because we use the this
+    var user = this;
+    
+    if (user.isModified('password') ) {
+
+
+        bcrypt.genSalt(10, (err, salt)  => {               // if user password is modified only then hash password. d
+            bcrypt.hash(user.password, salt, (err,hash) => {
+                user.password = hash;
+                next();
+            });
+        });
+    } else {
+        next();            // if user password is not modified (e.g. we modified some other property of user e.g. email), dont hash  it (its hashed already)
+    }
+});
 
 var User = mongoose.model('User', UserSchema);
 
