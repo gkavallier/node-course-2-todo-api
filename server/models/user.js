@@ -86,6 +86,28 @@ UserSchema.statics.findByToken = function(token) {
     });
 };
 
+UserSchema.statics.findByCredentials = function(email, password) {
+    var User = this; //  model methods get called with the model as the "this" binding
+   
+    return User.findOne({email}).then((user) => {
+        if (!user) {
+            return Promise.reject();
+        }
+        // bcrypt.compare uses callbacks. if we want to use promises we use below syntax
+        return new Promise((resolve, reject) => {
+
+            bcrypt.compare(password,user.password, (err,res) => {
+
+                if (res) {
+                    resolve(user);
+                } else {
+                    reject();
+                }
+            });
+        });
+    });
+};
+
 // .pre is a mongoose middleware so this runs code before an event - this time the save event
 
 UserSchema.pre('save', function (next) {  // classic function because we use the this
