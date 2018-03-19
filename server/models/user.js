@@ -53,7 +53,7 @@ UserSchema.methods.toJSON = function () {
 UserSchema.methods.generateAuthToken = function () {
     var user = this;     // instance methods (small letters) called with the individual document
     var access = 'auth';
-    var token =  jwt.sign({_id: user._id.toHexString(), access},'abc123').toString();
+    var token =  jwt.sign({_id: user._id.toHexString(), access}, process.env.JWT_SECRET).toString();
     // user.tokens.push({access,token});
     // push method above also works for me but for later versions of mongo concat method below works only
     user.tokens = user.tokens.concat([{
@@ -84,7 +84,7 @@ UserSchema.statics.findByToken = function(token) {
     var decoded;  //decoded initially undefined because we need to use (below) the try block in case of error so to catch it
 
     try {
-        decoded = jwt.verify(token, 'abc123');
+        decoded = jwt.verify(token, process.env.JWT_SECRET);
     } catch (e) {
         // return new Promise ((resolve, reject) => {
         //     reject();
