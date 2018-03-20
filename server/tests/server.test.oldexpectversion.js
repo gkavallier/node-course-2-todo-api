@@ -124,7 +124,7 @@ describe('DELETE /todos/:id', () => {
                     return done(err);
                 }
                 Todo.findById(hexId).then((todo) => {
-                        expect(todo).toBeFalsy();
+                        expect(todo).toNotExist();
                         
                         done();
                 }).catch((e) => done(e));
@@ -144,7 +144,7 @@ describe('DELETE /todos/:id', () => {
                     return done(err);
                 }
                 Todo.findById(hexId).then((todo) => {
-                        expect(todo).toBeTruthy();
+                        expect(todo).toExist();
                         
                         done();
                 }).catch((e) => done(e));
@@ -184,8 +184,7 @@ describe('PATCH /todos/:id', () => {
             .expect((res) => {
                 expect(res.body.todo.text).toBe(text);
                 expect(res.body.todo.completed).toBe(true);
-                // expect(res.body.todo.completedAt).toBeA('number');
-                expect(typeof res.body.todo.completedAt).toBe('number'); 
+                expect(res.body.todo.completedAt).toBeA('number');
             })
             .end(done);
     });
@@ -245,7 +244,7 @@ describe('PATCH /todos/:id', () => {
             .expect((res) => {
                 expect(res.body.todo.text).toBe(text);
                 expect(res.body.todo.completed).toBe(false);
-                expect(res.body.todo.completedAt).toBeFalsy();
+                expect(res.body.todo.completedAt).toNotExist();
             })
             .end(done);
     });
@@ -324,8 +323,8 @@ describe('POST /users', () => {
             .send({email, password})
             .expect(200)
             .expect( (res) => {
-                expect(res.headers['x-auth']).toBeTruthy(); // we use the bracket notation because the x-auth as '-' character and this will give syntax error with the '.' notation
-                expect(res.body._id).toBeTruthy();
+                expect(res.headers['x-auth']).toExist(); // we use the bracket notation because the x-auth as '-' character and this will give syntax error with the '.' notation
+                expect(res.body._id).toExist();
                 expect(res.body.email).toBe(email);
             
             })
@@ -334,8 +333,8 @@ describe('POST /users', () => {
                     return done(err);
                 }
                 User.findOne({email}).then((user) => {
-                    expect(user).toBeTruthy();
-                    expect(user.password).not.toBe(password);
+                    expect(user).toExist();
+                    expect(user.password).toNotBe(password);
                     done();
                 }).catch((e) => done(e));
             });
@@ -372,14 +371,14 @@ describe('POST /users/login', () => {
             })
             .expect(200)
             .expect((res) =>{
-                expect(res.headers['x-auth']).toBeTruthy;
+                expect(res.headers['x-auth']).toExist;
             })
             .end((err, res) =>{
                 if (err) {
                     return done(err);
                 }
                 User.findById(users[1]._id).then((user) => {
-                    expect(user.toObject().tokens[1]).toMatchObject({
+                    expect(user.tokens[1]).toInclude({
                         access: 'auth',
                         token: res.headers['x-auth']
                     });
@@ -397,7 +396,7 @@ describe('POST /users/login', () => {
             })
             .expect(400)
             .expect((res) =>{
-                expect(res.headers['x-auth']).toBeFalsy;
+                expect(res.headers['x-auth']).toNotExist;
             })
             .end((err, res) =>{
                 if (err) {
